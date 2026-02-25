@@ -4,11 +4,12 @@ import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Role } from '@/types/auth';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, UserPlus, Shield, User, Mail, Lock, X, CheckCircle2 } from 'lucide-react';
+import { Plus, UserPlus, Shield, User, Mail, Lock, X, CheckCircle2, Trash2, AlertTriangle } from 'lucide-react';
 
 export default function UserManagementPage() {
-    const { users, addUser } = useAuth();
+    const { users, addUser, removeUser } = useAuth();
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -54,7 +55,7 @@ export default function UserManagementPage() {
                                 <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">User</th>
                                 <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Email</th>
                                 <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider">Role</th>
-                                <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider text-right">Status</th>
+                                <th className="px-6 py-4 text-xs font-bold text-neutral-500 uppercase tracking-wider text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">
@@ -77,7 +78,17 @@ export default function UserManagementPage() {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-right">
-                                        <span className="text-xs text-emerald-500 font-medium">Active</span>
+                                        {user.role !== 'ADMIN' ? (
+                                            <button
+                                                onClick={() => setConfirmDeleteId(user.id)}
+                                                className="inline-flex items-center gap-1.5 text-xs text-neutral-500 hover:text-red-400 hover:bg-red-400/10 transition-all border border-transparent hover:border-red-500/20 px-3 py-1.5 rounded-lg"
+                                            >
+                                                <Trash2 size={14} />
+                                                Remove
+                                            </button>
+                                        ) : (
+                                            <span className="text-xs text-neutral-600 italic">Protected</span>
+                                        )}
                                     </td>
                                 </tr>
                             ))}
@@ -85,6 +96,55 @@ export default function UserManagementPage() {
                     </table>
                 </div>
             </div>
+
+            <AnimatePresence>
+                {confirmDeleteId && (() => {
+                    const target = users.find(u => u.id === confirmDeleteId);
+                    return (
+                        <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                                onClick={() => setConfirmDeleteId(null)}
+                            />
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                                className="relative w-full max-w-sm bg-neutral-900 border border-white/10 rounded-3xl shadow-2xl p-8"
+                            >
+                                <div className="flex flex-col items-center text-center gap-4">
+                                    <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center text-red-400">
+                                        <AlertTriangle size={32} />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-xl font-bold text-white mb-1">Remove Employee?</h2>
+                                        <p className="text-neutral-400 text-sm">
+                                            Are you sure you want to remove <span className="text-white font-semibold">{target?.name}</span>? This action cannot be undone.
+                                        </p>
+                                    </div>
+                                    <div className="flex gap-3 w-full mt-2">
+                                        <button
+                                            onClick={() => setConfirmDeleteId(null)}
+                                            className="flex-1 py-3 rounded-xl bg-white/5 border border-white/10 text-neutral-300 hover:text-white transition-all text-sm font-medium"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={() => { removeUser(confirmDeleteId); setConfirmDeleteId(null); }}
+                                            className="flex-1 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white transition-all text-sm font-bold shadow-lg shadow-red-500/20"
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </div>
+                    );
+                })()}
+            </AnimatePresence>
 
             <AnimatePresence>
                 {isModalOpen && (

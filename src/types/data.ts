@@ -12,7 +12,6 @@ export interface Client {
 
 export type TaskStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
 export type Priority = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-
 export interface Task {
     id: string;
     title: string;
@@ -24,8 +23,8 @@ export interface Task {
     description: string;
     deadline: string;
     createdAt: string;
-    timeSpent: number; // in seconds
-    progress: number; // 0 to 100
+    timeSpent: number;
+    progress: number;
 }
 
 export interface AttendanceRecord {

@@ -10,14 +10,8 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading) {
-      if (user) {
-        router.push(user.role === 'ADMIN' ? '/admin' : '/employee');
-      } else {
-        router.push('/login');
-      }
-    }
-  }, [user, isLoading, router]);
+    router.push('/login');
+  }, [router]);
 
   return (
     <div className="min-h-screen bg-neutral-950 flex items-center justify-center">

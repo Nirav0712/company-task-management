@@ -8,6 +8,7 @@ interface AuthContextType extends AuthState {
     login: (email: string, password: string) => Promise<boolean>;
     logout: () => void;
     addUser: (name: string, email: string, password: string, role: Role) => void;
+    removeUser: (id: string) => void;
     users: User[];
 }
 
@@ -97,6 +98,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUsers(updatedUsers.map(({ password, ...u }) => u));
     };
 
+    const removeUser = (id: string) => {
+        const storedUsers = JSON.parse(localStorage.getItem('app_users') || '[]');
+        const updatedUsers = storedUsers.filter((u: any) => u.id !== id);
+        localStorage.setItem('app_users', JSON.stringify(updatedUsers));
+        setUsers(updatedUsers.map(({ password, ...u }: any) => u));
+    };
+
     const logout = () => {
         localStorage.removeItem('auth_user');
         setState({ user: null, isLoading: false });
@@ -104,7 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     return (
-        <AuthContext.Provider value={{ ...state, login, logout, addUser, users }}>
+        <AuthContext.Provider value={{ ...state, login, logout, addUser, removeUser, users }}>
             {children}
         </AuthContext.Provider>
     );
